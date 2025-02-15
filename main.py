@@ -5,10 +5,13 @@ import requests
 from io import BytesIO
 import os
 
+import google.generativeai as genai
+
+
 app = Flask(__name__)
 
 # API Keys
-API_KEY = "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"
+API_KEY = "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"
 ELEVENLABS_API_KEY = "sk_f32763bd38562304978d5ebe96c54d3a2f098e50cc238fd7"
 
 # Set up Claude and ElevenLabs clients here
@@ -19,6 +22,8 @@ client = anthropic.Anthropic(api_key=API_KEY)
 @app.route('/')
 def index():
     return render_template('./index.html')  # We will create this HTML file
+
+
 @app.route('/process_pdf', methods=['POST'])
 def process_pdf():
     try:
@@ -27,11 +32,11 @@ def process_pdf():
         pdf_data = file.read()
 
         # Encode the PDF in Base64
-        encoded_pdf_data = base64.b64encode(pdf_data).decode('utf-8')
+        encoded_pdf_data =  base64.b64encode(pdf_data).decode('utf-8') # extract_text_from_pdf(pdf_data) #
         print(f"PDF Data Length: {len(encoded_pdf_data)}")  # Debug log
 
         # Get the instructions text from the form (ensure this is provided correctly in your form)
-        instructions_text = request.form.get('instructions', 'Convert the pdf content to a conversational style speech for 2 minutes and include the main points of the document. I am using Peter Griffin as the speaker, so make it align with his character without losing the main findings of the content. Include jokes to make it entertaining as well. Do not add the tone of the voice or expressions in asterisks**. Goal is to make the content as fun and entertaining as possible.')
+        instructions_text = request.form.get('instructions', 'Convert the pdf content to a conversational style speech for 2 minutes and include the main points of the document. Include jokes to make it entertaining as well. Do not add the tone of the voice or expressions in asterisks**. Goal is to make the content as fun and entertaining as possible.')
 
         # Debug log to confirm instructions text
         print(f"Instructions Text: {instructions_text}")
@@ -64,7 +69,7 @@ def process_pdf():
         cleaned_text = message.content[0].text.strip()
 
         # Send to ElevenLabs API for text-to-speech
-        url = "https://api.elevenlabs.io/v1/text-to-speech/595KJIE4EJo8CDdtxwud?output_format=mp3_44100_128"
+        url = "https://api.elevenlabs.io/v1/text-to-speech/PEEHDNaPqPa8rtKdChQc?output_format=mp3_44100_128"
         headers = {
             "xi-api-key": ELEVENLABS_API_KEY,
             "Content-Type": "application/json"
