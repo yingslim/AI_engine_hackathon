@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Audio & Subtitles</title>
+</head>
+<body>
+    <h1>PDF to Audio & Subtitles</h1>
+
+    <form id="pdfForm" action="/process_pdf" method="POST" enctype="multipart/form-data">
+        <label for="pdf">Upload PDF:</label>
+        <input type="file" id="pdf" name="pdf" required><br><br>
+
+        <label for="voice">Choose Voice:</label>
+        <select id="voice" name="instructions">
+            <option value="Peter Griffin">Peter Griffin</option>
+            <option value="Other Voice">Other Voice</option>
+        </select><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="output" style="display:none;">
+        <h2>Audio and Video</h2>
+        <audio id="audioPlayer" controls></audio>
+        <video id="videoPlayer" width="640" height="360" controls>
+            <source id="videoSource" src="../components/video.mp4" type="video/mp4">
+        </video>
+        <div id="subtitles"></div>
+    </div>
+
+    <script>
+        document.getElementById('pdfForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/process_pdf', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json()).then(data => {
+                if (data.audio_url) {
+                    document.getElementById('audioPlayer').src = data.audio_url;
+                    document.getElementById('videoPlayer').style.display = "block";
+                    document.getElementById('output').style.display = "block";
+
+                    // Display subtitles (simple version)
+                    let subtitles = data.subtitles;
+                    let subtitleText = "";
+                    subtitles.forEach(subtitle => {
+                        subtitleText += `<p>${subtitle.start} - ${subtitle.end}: ${subtitle.text}</p>`;
+                    });
+                    document.getElementById('subtitles').innerHTML = subtitleText;
+                }
+            }).catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
+
